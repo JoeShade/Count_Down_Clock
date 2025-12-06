@@ -2,7 +2,6 @@
 #include "RTClib.h"          // Load RTC library
 #include "RGBmatrixPanel.h"  // Load RGB Matrix library
 #include <EEPROM.h>          // Load EEPROM library
-#include <Wire.h>
 #include <pgmspace.h>    // Load PROGMEM library for ESP32
 
 // Load program files
@@ -34,19 +33,20 @@ constexpr int MATRIX_HEIGHT = 64;  // Set Matrix height
 #define E 27    // Set E address pin
 
 // Set pins for Debug and Reset
-#define RESET_PIN 4   // Clears EEPROM
-#define DEBUG_PIN 5   // Enables Debug mode
+#define RESET_PIN 21  // Clears EEPROM
+#define DEBUG_PIN 22  // Enables Debug mode
 
-// I2C pins for the DS1307 RTC
-constexpr int I2C_SDA = 21;
-constexpr int I2C_SCL = 22;
+// Set pins for RGB potentiometers (ESP32 ADC1 pins)
+#define RED_POT_PIN 34
+#define GREEN_POT_PIN 35
+#define BLUE_POT_PIN 32
 
 // Set pins for navigation button
-#define UP_PIN 25
-#define DOWN_PIN 33
-#define LEFT_PIN 32
-#define RIGHT_PIN 34
-#define CENTRE_PIN 35
+#define UP_PIN 16
+#define DOWN_PIN 17
+#define LEFT_PIN 25
+#define RIGHT_PIN 26
+#define CENTRE_PIN 33
 
 RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH);  // Create matrix object for use later
 
@@ -73,6 +73,11 @@ byte Red, Green, Blue;  // Store as byte to save memory
 // Declare Wake/Sleep time variables
 byte sleepHour;  // Declare Sleep hour variable
 byte wakeHour;   // Declare Wake Time variable
+
+int readColourValue(uint8_t pin) {
+  constexpr int ADC_MAX = 4095;
+  return constrain(map(analogRead(pin), 0, ADC_MAX, 0, 7), 0, 7);
+}
 
 // Create function for adjusting brightness for blink effect
 int adjustBrightness(int colour) {
@@ -254,6 +259,21 @@ void loop() {  // Put your main code here, to run repeatedly:
   byte pixelX = 0;                                                                                             // Declare X Pos.
   byte pixelY = 0;                                                                                             // Declare Y Pos.
   bool ledOff = CHECK_FLAG(flags, FLAG_SLEEP_MODE) && ((now.hour() >= sleepHour) || (now.hour() < wakeHour));  // Declare ledOff variable, check if sleepmode is enabled and if time is between sleep and wake time
+
+  // Declare RGB pot variables
+  // Read values from pin
+  int redValue = readColourValue(RED_POT_PIN);
+  int greenValue = readColourValue(GREEN_POT_PIN);
+  int blueValue = readColourValue(BLUE_POT_PIN);
+
+  if (CHECK_FLAG(flags, FLAG_DEBUG_MODE)) {
+    Serial.print("RGB values: ");
+    Serial.print(redValue);
+    Serial.print(", ");
+    Serial.print(greenValue);
+    Serial.print(", ");
+    Serial.print(blueValue);
+  }
 
   // Set Matrix colour based on whether LED is Off
   Red = ledOff ? 0 : 7;      // Set Red value
