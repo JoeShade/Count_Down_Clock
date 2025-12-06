@@ -271,7 +271,7 @@ void setUpMode() {
       rightLastButtonState = rightButtonState;
     }
 
-    EEPROM.update(10, flags);
+    EEPROM.write(10, flags);
     matrix.fillScreen(matrix.Color333(0, 0, 0));
 
     while (i == 2) {
@@ -616,9 +616,10 @@ void setUpMode() {
   }
   matrix.fillScreen(matrix.Color333(0, 0, 0));
   CLEAR_FLAG(flags, FLAG_SETUP_MODE);  // Clear setup flag
-  EEPROM.update(11, sleepHour);
-  EEPROM.update(12, wakeHour);
-  EEPROM.update(10, flags);  // Update stored flags
+  EEPROM.write(11, sleepHour);
+  EEPROM.write(12, wakeHour);
+  EEPROM.write(10, flags);  // Update stored flags
+  EEPROM.commit();
   delay(2500);
   Serial.flush();
   restartArduino();

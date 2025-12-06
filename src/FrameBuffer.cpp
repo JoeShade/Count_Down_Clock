@@ -27,9 +27,10 @@ void setPixel(int x, int y, bool state) {
 }
 
 // Create function to decompress from framebuffer
-void getPixel(int x, int y) {
-  int index = x / 2;
-  return (x % 2 == 0) ? (framebuffer[index] >> 4) : (framebuffer[index] & 0x0F);
+bool getPixel(int x, int y) {
+  int index = (y * MATRIX_WIDTH + x) / 8; // Locate the byte for this pixel
+  int bitPos = (y * MATRIX_WIDTH + x) % 8; // Locate the bit inside the byte
+  return (framebuffer[index] & (1 << bitPos)) != 0;
 }
 
 // Create function for rendering frame buffer 

@@ -5,18 +5,20 @@
 // Create function to clear EEPROM
 void clearEEPROM() {
  for(int i = 0; i < EEPROM.length(); i++) {
-      EEPROM.update(i, 255);
+      EEPROM.write(i, 255);
     }
+   EEPROM.commit();
    delay(5000);
    Serial.println("EEPROM Cleared");
 }
 
 // Create function to write Julian Date to EEPROM
 void writeToEEPROM(int address, uint32_t value) {
-    EEPROM.update(address, value & 0xFF);
-    EEPROM.update(address + 1, (value >> 8 ) & 0xFF);
-    EEPROM.update(address + 2, (value >> 16 ) & 0xFF);
-    EEPROM.update(address + 3, (value >> 24 ) & 0xFF);
+    EEPROM.write(address, value & 0xFF);
+    EEPROM.write(address + 1, (value >> 8 ) & 0xFF);
+    EEPROM.write(address + 2, (value >> 16 ) & 0xFF);
+    EEPROM.write(address + 3, (value >> 24 ) & 0xFF);
+    EEPROM.commit();
 }
 
 // Create function to read Julian Date from EEPROM

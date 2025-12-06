@@ -1,29 +1,25 @@
 # ESP32 Wiring Guide
 
-The sketch is configured for an ESP32 driving a HUB75 64×64 RGB panel and a DS1307 RTC. All buttons use `INPUT_PULLUP`, so they read **LOW** when pressed (shorted to GND). The display colour is fixed to white; no RGB potentiometers are required.
+Configured for an ESP32 driving a 64x64 HUB75 RGB panel and a DS1307 RTC. Buttons are `INPUT_PULLUP` (read LOW when pressed). Default pin map assumes the Adafruit RGBmatrixPanel defaults for data lines.
 
 ## RGB LED matrix (HUB75)
-- **CLK** → GPIO **18**
-- **OE** → GPIO **19**
-- **LAT** → GPIO **23**
-- **Address A/B/C/D/E** → GPIO **12 / 13 / 14 / 15 / 27**
-- **Power** → External **5 V** supply; tie matrix **GND** to ESP32 **GND**
+- R1/G1/B1/R2/G2/B2: GPIO 2 / 3 / 4 / 5 / 6 / 7
+- CLK: GPIO 18
+- OE: GPIO 19
+- LAT: GPIO 23
+- Address A/B/C/D/E: GPIO 12 / 13 / 14 / 15 / 27
+- Power: External 5 V; share GND with the ESP32
 
 ## RTC (DS1307)
-- **SDA** → GPIO **21**
-- **SCL** → GPIO **22**
-- **Power** → **3.3 V** and **GND** (plus backup coin cell on the module)
+- SDA: GPIO 21
+- SCL: GPIO 22
+- Power: 3.3 V and GND (plus coin cell)
 
 ## Controls and debug/reset
-- **Reset (clear EEPROM)** → GPIO **4** (momentary to **GND**)
-- **Debug enable** → GPIO **5** (short to **GND** to enable)
-- **Navigation buttons** (active-low to **GND**)
-  - UP: GPIO **25**
-  - DOWN: GPIO **33**
-  - LEFT: GPIO **32**
-  - RIGHT: GPIO **34**
-  - CENTRE/OK: GPIO **35**
+- Reset (clear EEPROM): GPIO 16 (momentary to GND)
+- Debug enable: GPIO 17 (short to GND)
+- Navigation (active-low to GND): UP 25, DOWN 33, LEFT 32, RIGHT 34, CENTRE/OK 35
 
-## Grounding and power tips
-- Share **GND** between the ESP32, matrix, RTC, and buttons.
-- Do **not** power the matrix from the ESP32’s 5 V pin; use a supply sized for the panel’s current draw.
+## Notes
+- If your panel wiring uses different ESP32 pins for R1/G1/B1/R2/G2/B2, we need to remap them in `RGBmatrixPanel` to match.
+- Do not power the panel from the ESP32’s 5 V pin; use a supply sized for the panel and tie grounds together.
