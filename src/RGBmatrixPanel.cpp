@@ -376,8 +376,8 @@ void RGBmatrixPanel::begin(void) {
   tim_config.divider = 2; // Run Timer at 40 MHz
   tim_config.counter_dir = TIMER_COUNT_UP;
   tim_config.counter_en = TIMER_PAUSE;
-  tim_config.alarm_en = true;
-  tim_config.auto_reload = true;
+  tim_config.alarm_en = TIMER_ALARM_EN;
+  tim_config.auto_reload = TIMER_AUTORELOAD_EN;
   tim_config.intr_type = TIMER_INTR_LEVEL;
 
   timer_init(TIMER_GROUP_1, TIMER_0, &tim_config);
@@ -619,7 +619,7 @@ void RGBmatrixPanel::DrawString_CN( uint8_t Xstart, uint8_t Ystart, const char *
   uint8_t bit, shift_x = 0, shift_y;
   uint16_t arr_sum;
   int x = Xstart, y = Ystart;
-  const unsigned char* p_text = pString;
+  const unsigned char* p_text = reinterpret_cast<const unsigned char*>(pString);
   while (*p_text != 0) {
     for (int Num = 0; Num < font->size ; Num++) {
       if ((*p_text == pgm_read_byte(&font->table[Num].index[0])) && (*(p_text + 1) == pgm_read_byte(&font->table[Num].index[1])) && (*(p_text + 2) == pgm_read_byte(&font->table[Num].index[2]))) 

@@ -32,21 +32,21 @@ constexpr int MATRIX_HEIGHT = 64;  // Set Matrix height
 #define D 15    // Set D address pin
 #define E 27    // Set E address pin
 
-// Set pins for Debug and Reset
-#define RESET_PIN 21  // Clears EEPROM
-#define DEBUG_PIN 22  // Enables Debug mode
+// Set pins for Debug and Reset (keep I2C pins free for RTC)
+#define RESET_PIN 16  // Clears EEPROM (active-low to GND)
+#define DEBUG_PIN 17  // Enables Debug mode (short to GND)
 
-// Set pins for RGB potentiometers (ESP32 ADC1 pins)
-#define RED_POT_PIN 34
-#define GREEN_POT_PIN 35
-#define BLUE_POT_PIN 32
+// Set pins for RGB potentiometers (ADC pins; optional hardware)
+#define RED_POT_PIN 36
+#define GREEN_POT_PIN 39
+#define BLUE_POT_PIN 26
 
-// Set pins for navigation button
-#define UP_PIN 16
-#define DOWN_PIN 17
-#define LEFT_PIN 25
-#define RIGHT_PIN 26
-#define CENTRE_PIN 33
+// Set pins for navigation buttons (active-low to GND)
+#define UP_PIN 25
+#define DOWN_PIN 33
+#define LEFT_PIN 32
+#define RIGHT_PIN 34
+#define CENTRE_PIN 35
 
 RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH);  // Create matrix object for use later
 
@@ -55,6 +55,7 @@ uint32_t birthDateJulian;               // Input birth date as Julian day, long 
 constexpr int BLINK_TIME_ON = 500;      // Set blink time on time
 constexpr int BLINK_TIME_OFF = 1500;    // Set blink time off time
 bool isPixelExerciseScheduled = false;  // Declare exerciser timing variable
+constexpr size_t EEPROM_SIZE = 64;      // Bytes reserved in EEPROM emulation
 
 
 // Declare variables for set up mode
@@ -114,7 +115,8 @@ const unsigned long centreHoldTime = 2000;
 void setup() {  // Put your setup code here, to run once:
 
   // Configure I2C for the DS1307 RTC
-  Wire.begin(I2C_SDA, I2C_SCL);
+  Wire.begin();
+  EEPROM.begin(EEPROM_SIZE);
 
   // Set pin modes
   pinMode(RESET_PIN, INPUT_PULLUP);
