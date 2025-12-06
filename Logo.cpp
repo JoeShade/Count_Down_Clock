@@ -1,6 +1,6 @@
 #include "Logo.h"
 #include "RGBmatrixPanel.h" // Load RGB Matrix library
-#include <avr/pgmspace.h> // Load PROGMEM library
+#include <pgmspace.h> // Load PROGMEM library for ESP32
 
 const unsigned char bitmap [] PROGMEM=
 {
