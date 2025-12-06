@@ -113,13 +113,12 @@ const unsigned long centreHoldTime = 2000;
 
 void setup() {  // Put your setup code here, to run once:
 
+  // Configure I2C for the DS1307 RTC
+  Wire.begin(I2C_SDA, I2C_SCL);
+
   // Set pin modes
   pinMode(RESET_PIN, INPUT_PULLUP);
   pinMode(DEBUG_PIN, INPUT_PULLUP);
-
-  pinMode(RED_POT_PIN, INPUT);
-  pinMode(GREEN_POT_PIN, INPUT);
-  pinMode(BLUE_POT_PIN, INPUT);
 
   pinMode(UP_PIN, INPUT_PULLUP);
   pinMode(DOWN_PIN, INPUT_PULLUP);
@@ -277,9 +276,9 @@ void loop() {  // Put your main code here, to run repeatedly:
   }
 
   // Set Matrix colour based on whether LED is Off
-  Red = ledOff ? 0 : redValue;      // Set Red value
-  Green = ledOff ? 0 : greenValue;  // Set Green value
-  Blue = ledOff ? 0 : blueValue;    // Set Blue value
+  Red = ledOff ? 0 : 7;      // Set Red value
+  Green = ledOff ? 0 : 7;    // Set Green value
+  Blue = ledOff ? 0 : 7;     // Set Blue value
 
   clearFramebuffer();
 
