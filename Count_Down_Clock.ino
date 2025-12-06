@@ -2,11 +2,7 @@
 #include "RTClib.h"          // Load RTC library
 #include "RGBmatrixPanel.h"  // Load RGB Matrix library
 #include <EEPROM.h>          // Load EEPROM library
-#if defined(ARDUINO_ARCH_ESP32)
 #include <pgmspace.h>    // Load PROGMEM library for ESP32
-#else
-#include <avr/pgmspace.h>    // Load PROGMEM library
-#endif
 
 // Load program files
 #include "Logo.h"             // Load Logo
@@ -26,31 +22,31 @@ RTC_DS1307 rtc;  // Create RTC object for use later
 constexpr int MATRIX_WIDTH = 64;   // Set Matrix width
 constexpr int MATRIX_HEIGHT = 64;  // Set Matrix height
 
-// Set pins for RGB Matrix
-#define CLK 11  // Set Clock pin
-#define OE 9    // Set Output enable pin
-#define LAT 10  // Set Latch pin
-#define A A0    // Set A address pin
-#define B A1    // Set B address pin
-#define C A2    // Set C address pin
-#define D A3    // Set D address pin
-#define E A4    // Set E address pin
+// Set pins for RGB Matrix (ESP32)
+#define CLK 18  // Set Clock pin
+#define OE 19   // Set Output enable pin
+#define LAT 23  // Set Latch pin
+#define A 12    // Set A address pin
+#define B 13    // Set B address pin
+#define C 14    // Set C address pin
+#define D 15    // Set D address pin
+#define E 27    // Set E address pin
 
 // Set pins for Debug and Reset
-#define RESET_PIN 2  // Clears EEPROM
-#define DEBUG_PIN 3  // Enables Debug mode
+#define RESET_PIN 21  // Clears EEPROM
+#define DEBUG_PIN 22  // Enables Debug mode
 
-// Set pins for RGB potentiometers
-#define RED_POT_PIN A9
-#define GREEN_POT_PIN A10
-#define BLUE_POT_PIN A11
+// Set pins for RGB potentiometers (ESP32 ADC1 pins)
+#define RED_POT_PIN 34
+#define GREEN_POT_PIN 35
+#define BLUE_POT_PIN 32
 
 // Set pins for navigation button
-#define UP_PIN 4
-#define DOWN_PIN 5
-#define LEFT_PIN 6
-#define RIGHT_PIN 7
-#define CENTRE_PIN 8
+#define UP_PIN 16
+#define DOWN_PIN 17
+#define LEFT_PIN 25
+#define RIGHT_PIN 26
+#define CENTRE_PIN 33
 
 RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH);  // Create matrix object for use later
 
@@ -79,11 +75,7 @@ byte sleepHour;  // Declare Sleep hour variable
 byte wakeHour;   // Declare Wake Time variable
 
 int readColourValue(uint8_t pin) {
-#if defined(ARDUINO_ARCH_ESP32)
   constexpr int ADC_MAX = 4095;
-#else
-  constexpr int ADC_MAX = 1023;
-#endif
   return constrain(map(analogRead(pin), 0, ADC_MAX, 0, 7), 0, 7);
 }
 
