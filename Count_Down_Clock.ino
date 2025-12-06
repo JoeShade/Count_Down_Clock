@@ -2,7 +2,11 @@
 #include "RTClib.h"          // Load RTC library
 #include "RGBmatrixPanel.h"  // Load RGB Matrix library
 #include <EEPROM.h>          // Load EEPROM library
+#if defined(ARDUINO_ARCH_ESP32)
+#include <pgmspace.h>    // Load PROGMEM library for ESP32
+#else
 #include <avr/pgmspace.h>    // Load PROGMEM library
+#endif
 
 // Load program files
 #include "Logo.h"             // Load Logo
@@ -73,6 +77,15 @@ byte Red, Green, Blue;  // Store as byte to save memory
 // Declare Wake/Sleep time variables
 byte sleepHour;  // Declare Sleep hour variable
 byte wakeHour;   // Declare Wake Time variable
+
+int readColourValue(uint8_t pin) {
+#if defined(ARDUINO_ARCH_ESP32)
+  constexpr int ADC_MAX = 4095;
+#else
+  constexpr int ADC_MAX = 1023;
+#endif
+  return constrain(map(analogRead(pin), 0, ADC_MAX, 0, 7), 0, 7);
+}
 
 // Create function for adjusting brightness for blink effect
 int adjustBrightness(int colour) {
@@ -258,9 +271,9 @@ void loop() {  // Put your main code here, to run repeatedly:
 
   // Declare RGB pot variables
   // Read values from pin
-  int redValue = round(analogRead(RED_POT_PIN) / 140);
-  int greenValue = round(analogRead(GREEN_POT_PIN) / 140);
-  int blueValue = round(analogRead(BLUE_POT_PIN) / 140);
+  int redValue = readColourValue(RED_POT_PIN);
+  int greenValue = readColourValue(GREEN_POT_PIN);
+  int blueValue = readColourValue(BLUE_POT_PIN);
 
   if (CHECK_FLAG(flags, FLAG_DEBUG_MODE)) {
     Serial.print("RGB values: ");
@@ -287,7 +300,7 @@ void loop() {  // Put your main code here, to run repeatedly:
     int bitPos = (pixelY * MATRIX_WIDTH + pixelX) % 8;
     framebuffer[index] |= (1 << bitPos);  // Set bit
 
-    if CHECK_FLAG (flags, FLAG_DEBUG_MODE) {    // Print if debug mode is enabled
+    if (CHECK_FLAG(flags, FLAG_DEBUG_MODE)) {    // Print if debug mode is enabled
       Serial.println("Counter: " + String(i));  // Print current counter value
     }
   }

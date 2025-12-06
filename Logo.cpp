@@ -1,6 +1,10 @@
 #include "Logo.h"
 #include "RGBmatrixPanel.h" // Load RGB Matrix library
+#if defined(ARDUINO_ARCH_ESP32)
+#include <pgmspace.h> // Load PROGMEM library for ESP32
+#else
 #include <avr/pgmspace.h> // Load PROGMEM library
+#endif
 
 const unsigned char bitmap [] PROGMEM=
 {
