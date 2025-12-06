@@ -1,6 +1,6 @@
 #ifndef __CN_H
 #define __CN_H
-#include "avr/pgmspace.h"
+#include <pgmspace.h>
 
 #define MAX_HEIGHT_FONT         64
 #define MAX_WIDTH_FONT          64

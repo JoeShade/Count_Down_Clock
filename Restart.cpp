@@ -2,28 +2,32 @@
 #include "Arduino.h"
 #include "RGBmatrixPanel.h"
 #include "EEPROMfunctions.h"
-#include <avr/wdt.h> // Load watch dog timer library
+
+#include <esp_task_wdt.h>
+#include <esp_system.h>
 
 extern RGBmatrixPanel matrix;
 volatile byte resetEnable = LOW;
-volatile uint8_t timeoutCounter __attribute__ ((section (".noinit")));
+volatile uint8_t timeoutCounter;
 
 
 // Create restart function
 void restartArduino() {
-  wdt_enable(WDTO_15MS);  // Enable watchdog timer with a 15ms timeout
-  while (1);  // Wait for watchdog reset
+  ESP.restart();
 }
 
 // Create WDT reset function
 void watchdogReset() {
-wdt_reset();
+  esp_task_wdt_reset();
 }
 
 // Create WDT start function
 void watchdogStart() {
-  wdt_enable(WDTO_8S); // Enable watchdog timer with 8s timeout
-  while (1); // Wait fror watchdog reset
+  esp_task_wdt_init(8, true);
+  esp_task_wdt_add(NULL);
+  while (true) {
+    // Wait for watchdog to trigger reset
+  }
 }
 
 // Creat reset function 
