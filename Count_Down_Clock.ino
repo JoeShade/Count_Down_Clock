@@ -2,7 +2,8 @@
 #include "RTClib.h"          // Load RTC library
 #include "RGBmatrixPanel.h"  // Load RGB Matrix library
 #include <EEPROM.h>          // Load EEPROM library
-#include <avr/pgmspace.h>    // Load PROGMEM library
+#include <Wire.h>
+#include <pgmspace.h>    // Load PROGMEM library for ESP32
 
 // Load program files
 #include "Logo.h"             // Load Logo
@@ -22,31 +23,30 @@ RTC_DS1307 rtc;  // Create RTC object for use later
 constexpr int MATRIX_WIDTH = 64;   // Set Matrix width
 constexpr int MATRIX_HEIGHT = 64;  // Set Matrix height
 
-// Set pins for RGB Matrix
-#define CLK 11  // Set Clock pin
-#define OE 9    // Set Output enable pin
-#define LAT 10  // Set Latch pin
-#define A A0    // Set A address pin
-#define B A1    // Set B address pin
-#define C A2    // Set C address pin
-#define D A3    // Set D address pin
-#define E A4    // Set E address pin
+// Set pins for RGB Matrix (ESP32)
+#define CLK 18  // Set Clock pin
+#define OE 19   // Set Output enable pin
+#define LAT 23  // Set Latch pin
+#define A 12    // Set A address pin
+#define B 13    // Set B address pin
+#define C 14    // Set C address pin
+#define D 15    // Set D address pin
+#define E 27    // Set E address pin
 
 // Set pins for Debug and Reset
-#define RESET_PIN 2  // Clears EEPROM
-#define DEBUG_PIN 3  // Enables Debug mode
+#define RESET_PIN 4   // Clears EEPROM
+#define DEBUG_PIN 5   // Enables Debug mode
 
-// Set pins for RGB potentiometers
-#define RED_POT_PIN A9
-#define GREEN_POT_PIN A10
-#define BLUE_POT_PIN A11
+// I2C pins for the DS1307 RTC
+constexpr int I2C_SDA = 21;
+constexpr int I2C_SCL = 22;
 
 // Set pins for navigation button
-#define UP_PIN 4
-#define DOWN_PIN 5
-#define LEFT_PIN 6
-#define RIGHT_PIN 7
-#define CENTRE_PIN 8
+#define UP_PIN 25
+#define DOWN_PIN 33
+#define LEFT_PIN 32
+#define RIGHT_PIN 34
+#define CENTRE_PIN 35
 
 RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH);  // Create matrix object for use later
 
@@ -108,13 +108,12 @@ const unsigned long centreHoldTime = 2000;
 
 void setup() {  // Put your setup code here, to run once:
 
+  // Configure I2C for the DS1307 RTC
+  Wire.begin(I2C_SDA, I2C_SCL);
+
   // Set pin modes
   pinMode(RESET_PIN, INPUT_PULLUP);
   pinMode(DEBUG_PIN, INPUT_PULLUP);
-
-  pinMode(RED_POT_PIN, INPUT);
-  pinMode(GREEN_POT_PIN, INPUT);
-  pinMode(BLUE_POT_PIN, INPUT);
 
   pinMode(UP_PIN, INPUT_PULLUP);
   pinMode(DOWN_PIN, INPUT_PULLUP);
@@ -256,25 +255,10 @@ void loop() {  // Put your main code here, to run repeatedly:
   byte pixelY = 0;                                                                                             // Declare Y Pos.
   bool ledOff = CHECK_FLAG(flags, FLAG_SLEEP_MODE) && ((now.hour() >= sleepHour) || (now.hour() < wakeHour));  // Declare ledOff variable, check if sleepmode is enabled and if time is between sleep and wake time
 
-  // Declare RGB pot variables
-  // Read values from pin
-  int redValue = round(analogRead(RED_POT_PIN) / 140);
-  int greenValue = round(analogRead(GREEN_POT_PIN) / 140);
-  int blueValue = round(analogRead(BLUE_POT_PIN) / 140);
-
-  if (CHECK_FLAG(flags, FLAG_DEBUG_MODE)) {
-    Serial.print("RGB values: ");
-    Serial.print(redValue);
-    Serial.print(", ");
-    Serial.print(greenValue);
-    Serial.print(", ");
-    Serial.print(blueValue);
-  }
-
   // Set Matrix colour based on whether LED is Off
-  Red = ledOff ? 0 : redValue;      // Set Red value
-  Green = ledOff ? 0 : greenValue;  // Set Green value
-  Blue = ledOff ? 0 : blueValue;    // Set Blue value
+  Red = ledOff ? 0 : 7;      // Set Red value
+  Green = ledOff ? 0 : 7;    // Set Green value
+  Blue = ledOff ? 0 : 7;     // Set Blue value
 
   clearFramebuffer();
 
@@ -287,7 +271,7 @@ void loop() {  // Put your main code here, to run repeatedly:
     int bitPos = (pixelY * MATRIX_WIDTH + pixelX) % 8;
     framebuffer[index] |= (1 << bitPos);  // Set bit
 
-    if CHECK_FLAG (flags, FLAG_DEBUG_MODE) {    // Print if debug mode is enabled
+    if (CHECK_FLAG(flags, FLAG_DEBUG_MODE)) {    // Print if debug mode is enabled
       Serial.println("Counter: " + String(i));  // Print current counter value
     }
   }
