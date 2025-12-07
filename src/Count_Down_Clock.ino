@@ -22,33 +22,36 @@ RTC_DS1307 rtc;  // Create RTC object for use later
 constexpr int MATRIX_WIDTH = 64;   // Set Matrix width
 constexpr int MATRIX_HEIGHT = 64;  // Set Matrix height
 
-// Set pins for RGB Matrix (ESP32)
-#define CLK 18  // Set Clock pin
-#define OE 19   // Set Output enable pin
-#define LAT 23  // Set Latch pin
-#define A 12    // Set A address pin
-#define B 13    // Set B address pin
-#define C 14    // Set C address pin
-#define D 15    // Set D address pin
-#define E 27    // Set E address pin
+// HUB75 control pins
+#define CLK 18   // Clock
+#define OE 19    // Output enable
+#define LAT 23   // Latch
+#define A 12     // Address A
+#define B 13     // Address B
+#define C 14     // Address C
+#define D 15     // Address D
+#define E 4      // Address E
 
-// Set pins for Debug and Reset (keep I2C pins free for RTC)
-#define RESET_PIN 16  // Clears EEPROM (active-low to GND)
-#define DEBUG_PIN 17  // Enables Debug mode (short to GND)
+// HUB75 RGB data pins (R1, G1, B1, R2, G2, B2) for ESP32 DevKit
+uint8_t matrixPins[6] = {16, 17, 25, 26, 27, 32};
+
+// Set pins for Debug and Reset (active-low to GND; external pull-ups required on input-only pins)
+#define RESET_PIN 36  // Clears EEPROM
+#define DEBUG_PIN 39  // Enables Debug mode
 
 // Set pins for RGB potentiometers (ADC pins; optional hardware)
-#define RED_POT_PIN 36
-#define GREEN_POT_PIN 39
-#define BLUE_POT_PIN 26
+#define RED_POT_PIN 34
+#define GREEN_POT_PIN 35
+#define BLUE_POT_PIN 33
 
 // Set pins for navigation buttons (active-low to GND)
-#define UP_PIN 25
-#define DOWN_PIN 33
-#define LEFT_PIN 32
-#define RIGHT_PIN 34
-#define CENTRE_PIN 35
+#define UP_PIN 2
+#define DOWN_PIN 5
+#define LEFT_PIN 21
+#define RIGHT_PIN 22
+#define CENTRE_PIN 25
 
-RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH);  // Create matrix object for use later
+RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH, matrixPins);  // Create matrix object for use later
 
 // Declare global variables and constants
 uint32_t birthDateJulian;               // Input birth date as Julian day, long int required to avoid integer overflow
