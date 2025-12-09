@@ -33,7 +33,8 @@ constexpr int MATRIX_HEIGHT = 64;  // Set Matrix height
 #define E 4      // Address E
 
 // HUB75 RGB data pins (R1, G1, B1, R2, G2, B2) for ESP32 DevKit
-uint8_t matrixPins[6] = {16, 17, 25, 26, 27, 32};
+// Use output-capable pins for color lines (B2 on GPIO5)
+uint8_t matrixPins[6] = {16, 17, 25, 26, 27, 5};
 
 // Set pins for Debug and Reset (active-low to GND; external pull-ups required on input-only pins)
 #define RESET_PIN 36  // Clears EEPROM
@@ -46,10 +47,10 @@ uint8_t matrixPins[6] = {16, 17, 25, 26, 27, 32};
 
 // Set pins for navigation buttons (active-low to GND)
 #define UP_PIN 2
-#define DOWN_PIN 5
-#define LEFT_PIN 21
-#define RIGHT_PIN 22
-#define CENTRE_PIN 25
+#define DOWN_PIN 33  // internal pull-up
+#define LEFT_PIN 34   // external pull-up required
+#define RIGHT_PIN 35  // external pull-up required
+#define CENTRE_PIN 32 // external pull-up required
 
 RGBmatrixPanel matrix(A, B, C, D, E, CLK, LAT, OE, false, MATRIX_WIDTH, matrixPins);  // Create matrix object for use later
 
@@ -118,8 +119,13 @@ const unsigned long centreHoldTime = 2000;
 void setup() {  // Put your setup code here, to run once:
 
   // Configure I2C for the DS1307 RTC
-  Wire.begin();
+  Wire.begin(21, 22);
   EEPROM.begin(EEPROM_SIZE);
+
+  // Show the logo early for display troubleshooting
+  matrix.begin();
+  matrix.setRotation(3);  // Rotate to match panel orientation (adjust if needed)
+  displayLogo();
 
   // Set pin modes
   pinMode(RESET_PIN, INPUT_PULLUP);
@@ -132,7 +138,7 @@ void setup() {  // Put your setup code here, to run once:
   pinMode(CENTRE_PIN, INPUT_PULLUP);
 
   Serial.begin(9600);  // Start serial port and set Baudrate
-  matrix.begin();      // Initialise LED matrix
+  // matrix.begin();      // Already initialized above
 
   attachInterrupt(digitalPinToInterrupt(RESET_PIN), reset, FALLING);
 
@@ -181,16 +187,24 @@ void setup() {  // Put your setup code here, to run once:
     Serial.println(wakeHour);
   }
 
-  if (!rtc.begin()) {                                                 // Check if RTC can be found
-    Serial.println("Couldn't find RTC. Restarting in 5 seconds...");  // Print line if RTC is not present
-    Serial.flush();                                                   // Make sure message is displayed before proceeding
-    delay(5000);                                                      //  Wait 5 seconds
-    restartArduino();
+  // Simple I2C scan to verify RTC presence
+  byte i2cFound = 0;
+  for (byte addr = 1; addr < 127; addr++) {
+    Wire.beginTransmission(addr);
+    if (Wire.endTransmission() == 0) {
+      Serial.print("I2C device at 0x");
+      Serial.println(addr, HEX);
+      i2cFound++;
+    }
+  }
+  if (i2cFound == 0) {
+    Serial.println("No I2C devices found");
   }
 
-  if (!rtc.isrunning()) {                                              // Check if RTC is running
-    Serial.println("RTC is NOT running! Restarting in 5 seconds...");  // Print line if RTC is present but not running
-    Serial.flush();                                                    // Make sure message is displayed before proceeding
+  if (!rtc.begin()) {                                                 // Check if RTC can be found
+    Serial.println("Couldn't find RTC. Skipping RTC checks.");        // Print line if RTC is not present
+  } else if (!rtc.isrunning()) {                                      // Check if RTC is running
+    Serial.println("RTC is NOT running!");                            // Print line if RTC is present but not running
     // Flash matrix red 3 times
     for (int i = 0; i < 3; i++) {
       matrix.fillScreen(matrix.Color333(5, 0, 0));
@@ -198,8 +212,6 @@ void setup() {  // Put your setup code here, to run once:
       matrix.fillScreen(matrix.Color333(0, 0, 0));
       delay(50);
     }
-    delay(4100);  // Wait 4.1 seconds
-    restartArduino();
   }
 
   if (CHECK_FLAG(flags, FLAG_DEBUG_MODE)) {

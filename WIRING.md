@@ -1,9 +1,9 @@
 # ESP32 Wiring Guide (DOIT DevKit V1)
 
-Pin map adjusted to avoid GPIO6/7. Buttons use INPUT_PULLUP where supported; input-only pins need external pull-ups to 3.3 V.
+Updated: B2 on GPIO5, DOWN button on GPIO33.
 
 ## RGB LED matrix (HUB75)
-- R1/G1/B1/R2/G2/B2: GPIO **16 / 17 / 25 / 26 / 27 / 32**
+- R1/G1/B1/R2/G2/B2: GPIO **16 / 17 / 25 / 26 / 27 / 5**
 - CLK: GPIO **18**
 - OE: GPIO **19**
 - LAT: GPIO **23**
@@ -18,13 +18,14 @@ Pin map adjusted to avoid GPIO6/7. Buttons use INPUT_PULLUP where supported; inp
 ## Controls and debug/reset
 - Reset (clear EEPROM): GPIO **36** (external pull-up to 3.3 V; momentary to GND)
 - Debug enable: GPIO **39** (external pull-up to 3.3 V; short to GND)
-- Navigation buttons (active-low to GND; internal pull-ups on 2/5/21/22; add pull-up on 25 if needed):
-  - UP: GPIO **2**
-  - DOWN: GPIO **5**
-  - LEFT: GPIO **21**
-  - RIGHT: GPIO **22**
-  - CENTRE/OK: GPIO **25**
+- Navigation buttons (active-low to GND; external pull-ups needed on 34/35/32):
+  - UP: GPIO **2** (internal pull-up)
+  - DOWN: GPIO **33** (internal pull-up)
+  - LEFT: GPIO **34** (external pull-up)
+  - RIGHT: GPIO **35** (external pull-up)
+  - CENTRE/OK: GPIO **32** (external pull-up)
 
 ## Notes
-- If any of your wired pins differ from this map, tell me the exact wiring and I’ll remap the code.
+- All matrix data pins are output-capable.
+- External pull-ups are required on GPIO34/35/32/36/39 since they lack internal pull-ups.
 - Do not power the panel from the ESP32’s 5 V pin; use a supply sized for the panel and tie grounds together.

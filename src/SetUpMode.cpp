@@ -25,10 +25,10 @@ extern bool rightButtonState;
 extern bool rightLastButtonState;
 
 #define UP_PIN 2
-#define DOWN_PIN 5
-#define LEFT_PIN 21
-#define RIGHT_PIN 22
-#define CENTRE_PIN 25
+#define DOWN_PIN 33
+#define LEFT_PIN 34
+#define RIGHT_PIN 35
+#define CENTRE_PIN 32
 
 // Declare date variables
 
